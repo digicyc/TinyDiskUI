@@ -1,0 +1,17 @@
+# TinyDiskFile - used to retrieve a file that has been stored in TinyUrl.com!
+#
+# By Acidus - Most Significant Bit Labs - Acidus@msblabs.org
+Version: 1.0
+Filename: level3.c
+Size: 573
+Checksum Algorithm: CRC32
+Checksum: 1143258214
+Compression Algorithm: Deflate
+Encryption Algorithm: AES, 128bit
+Encryption Key: b9kDps8fnziWY6wITrEroQ==
+#
+# Cluster Hashes
+#
+Clusters: 1
+Cluster: 1fc4
+

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<project name="TinyDisk" default="dist" basedir=".">
+	<property name="build" location="build" />
+	<property name="src" location="src" />
+
+	<property name="debug" value="true" />
+
+	<target name="init">
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac source="1.5" srcdir="${src}" deprecation="off" destdir="${build}" debug="${debug}">
+		</javac>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build}" /> 
+		<delete file="TinyDisk.jar" />
+	</target>
+
+	<target name="cleanbuild">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="dist" depends="compile">
+        <copy todir="${build}/images">
+			<fileset dir="${src}/images" />
+		</copy>
+            
+		<jar destfile="TinyDisk.jar" basedir="${build}">                 
+			<manifest>
+				<attribute name="Main-Class" value="org.antitech.gui.UserInterface" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="run" depends="dist">
+		<java jar="TinyDisk.jar" fork="true" />
+	</target>
+
+</project>

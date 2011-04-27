@@ -1,0 +1,69 @@
+Storing files inside TinyURL
+
+Files are stored inside TinyURL very similar to a FAT or linked list-like 
+file system. A file is divided into a sequence of clusters of a given length. 
+Each cluster is submitted to TinyURL, inserted into their database, and 
+assigned a hash. This hash is used to retrieve a cluster from TinyURL's 
+database. To download a file that has been stored in TinyURL, simply retrieve 
+all the clusters associated with the file and concatinate all the clusters 
+together, in order.
+
+
+How a file prepared and stored inside TinyURL is as follows:
+1- Compute the checksum for the file (CRC32 is the default)
+2- Compress the file (zlib's deflate algorithm is the default)
+3- Encrypt the compressed file with a randomly generated key (128bit AES is 
+the default)
+4- Base64 encode the file
+5- Divide the file into clusters of a given size (default is 4096)
+6- Submit each cluster to TinyURL and store the hash associated with each 
+clusters
+7- Create a meta file used to retrieve a file
+
+When a file is stored in TinyURL, a meta file is produced. This meta file 
+includes information needed to retrieve the original file from TinyURL 
+including filename, a checksum, and the order and hash for all the clusters. 
+Version 1.0 of the meta file has the following structure:
+
+* Version - Defines the version of the meta file format
+* Filename - The filename of the original file stored in TinyURL
+* Size - The size in bytes of the original file
+* Checksum Algorithm - The checksum algorithm used to verify file integrety. 
+Valid values are "CRC32" or "MD5"
+* Checksum - A string representing the checksum value. For CRC32, this is a 
+decimal number. For MD5, this is a Base64 representation of the hash.
+* Encryption Algorithm - Encryption Algorithm and strength used to encrypt 
+this file. The only valid value is "AES, 128bit" 
+* Encryption Key - the encryption key or passphrase used to unencrypt this 
+file. For "AES, 128bit" this is the Base64 encoding of the key.
+* Clusters - Specifies the number of clusters/hashes associated with this file
+* Cluster - The hash of one of the clusters used to by TinyURL to store this 
+file. There MUST be the same number of Cluster statements as there are 
+clusters given in the Clusters statement. These clusters MUST be listed in 
+the order needed to properly reconstruct a file.
+
+All fields are required. Empty lines and lines that being with a hash (#) are 
+ignored by the meta file parser.
+
+
+To retrieve a file from TinyURL:
+1- Open a meta file
+2- Retrieve and concatenate all the clusters from TinyURL in the order 
+specified in the meta file.
+2- Base64 decode the file 
+3- Decrypt the file with the algorithm and key in the meta file
+4- Decompress the file with the algorithm in the meta file.
+5 - Verify the file size given in the meta file is correct for the 
+decoded/decrypted/decompressed file
+6- Verify the checksum with the algorithm and value in the meta file matches 
+for the decoded/decrypted/decompressed file
+7- Set the filename of the decoded/decrypted/decompressed file to the 
+filename specified in the meta file.
+
+
+
+
+
+
+
+

@@ -1,0 +1,75 @@
+How TinyURL Functions Normally:
+
+-User submits a long url to the TinyURL database using an HTML form. 
+Ultimately, this submission becomes a HTTP GET or POST command (both are 
+supported). Anyone can submit urls for free. The url is added instantly to 
+the database, a unique 1-5 character hash is assigned. This is simply a 
+unique identifier and not an actual hash of the submitted url.
+
+-To go to the long url that was submitted, people can go to 
+http://tinyurl.com/abcde where "acbde" is the hash. TinyURL uses HTTP 302 
+redirects to send a web browser to the appropriate website
+
+How TinyDisk works:
+
+Since TinyURL is a web application, TinyDisk needs to issue and parse HTTP 
+requests and responses.
+
+Creating data is easy enough. For out purposes we will use an HTTP POST to 
+http://tinyurl.com/create.php. The content of the POST should be a base64 
+encoding of the url=[the date to submit]. We parse the resulting page to make 
+sure the data was submitted properly and to retrieve the hash associated with 
+that data.
+
+To be retrieve data from TinyURL, we must parse out the 302 redirect TinyURL 
+issues in response to a request. TinyURL actually uses 2 nested 302 redirects 
+before you can get at the data (perhaps the first takes you to a load 
+balancer?) Issuing an HTTP GET to http://tinyurl.com/abcdef results in a 302 
+redirect to http://forwarding.tinyurl.com/redirect.php?num=abcde. Issuing an 
+HTTP GET to that url results in a 302 redirect with the Location header set 
+to the url/data that was submitted. By issuing GETs directly to 
+forwarding.tinyurl.com we can extract our stored data from the Location 
+header. TinyURL appending an "http://" on the front of the Location header, 
+so we ignore it.
+
+Here is an example of how data can be extracted from TinyURL.
+
+[acidus@reload acidus]$ telnet forwarding.tinyurl.com 80
+Trying 70.85.22.180...
+Connected to forwarding.tinyurl.com (70.85.22.180).
+Escape character is '^]'.
+GET /redirect.php?num=bf6wm HTTP/1.1
+Host: fowarding.tinyurl.com
+
+HTTP/1.1 302 Found
+Date: Tue, 27 Sep 2005 04:23:39 GMT
+Server: Apache/2.0.46 (Red Hat)
+Accept-Ranges: bytes
+X-Powered-By: PHP/4.3.2
+X-abuse: Harvesting TinyURLs is not tolerated. It overloads our servers and 
+is considered theft of service.
+Location: 
+http://KioqVGhpcyBpcyB0aGUgUHJvamVjdCBHdXRlbmJlcmcgRXRleHQgb2YgQWxpY2UgaW4gV29
+uZGVy
+bGFuZCoqKg0KKlRoaXMgMzB0aCBlZGl0aW9uIHNob3VsZCBiZSBsYWJlbGVkIGFsaWNlMzAudHh0
+IG9yIGFsaWNlMzAuemlwLg0KKioqVGhpcyBFZGl0aW9uIElzIEJlaW5nIE9mZmljaWFsbHkgUmVs
+ZWFzZWQgT24gTWFyY2ggOCwgMTk5NCoqKg0KKipJbiBDZWxlYnJhdGlvbiBPZiBUaGUgMjNyZCBB
+...
+...
+(This is a 220K Base64 representation of Lewis Carroll's Alice In Wonderland)
+
+Performance and "niceness" issues.
+
+While TinyURL currently places no limit on the amount of data you can insert 
+into a single hash this is likely to change and is not desirable. Instead we 
+break a file into a number of clusters, much like a hard drive, and save a 
+each cluster in its own hash. We need to Base64 encode the entire file so 
+that it survives the Internet, webserver and database properly. Since this 
+increases the filesize, we will be nice to TinyURL and losslessly compress 
+the file before encoding. To protect people from reading or stumbling upon 
+randomm plain text clusters inside the database, the entire file is also 
+encrypted. To ensure maximum security, this key is randomly choosen and 
+stored in a meta file so the users don't need to remember it. The meta file 
+also stores the hashes of the clusters and the order to reassemble the 
+clusters to form the original file. Checksums and other info is also used. A 
+meta file is all that is needed to retrieve a file from TinyURL.

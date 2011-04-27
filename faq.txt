@@ -1,0 +1,20 @@
+Q: Isn't this another stupid hack with no purpose
+A: This is a cool hack that adds utility over other file system hacks. Its
+an anonymous, persistent shared filesystem. Once something is uploaded,
+only the database admin can delete it. Everyone can read it. No one can
+know who created it.
+
+Q: Aren't you picking on TinyURL?
+A: Not really. Out of the box, TinyDisk is not configured by default to even
+use TinyURL. Out of the box, you cannot upload files larger than 2 megs. I
+am actively distributing a alternative system so people can play with
+TinyDisk *without* polluting TinyURL's database.
+
+Q: This damn thing doesn't work! #@%& You!
+A: Did you just download it and run it? RTFM! It is configured about of the
+box to use an instance of Nanourl running on localhost. Edit the config file
+TinyDisk.config and select the TinyURL stuff.
+
+Q: This damn thing doesn't work on large files! #@%& You!
+A: Did you not read the manual? Man I wish I could punch you in the face over
+TCP/IP! Change the config file's MaxSize line. By default the limit is 2 megs.
