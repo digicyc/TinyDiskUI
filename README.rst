@@ -38,7 +38,7 @@ defines what servers TinyDisk uses.
 
 In addition, TinyDisk will only update files up to 2 megs by default.
 You can change this to be larger. Please don't upload your 20 gigs of
-porn into someone else's service!
+videos into someone else's service!
 
 LICENSE:
 TinyDisk is BSD Licensed
